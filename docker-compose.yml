@@ -22,7 +22,7 @@ services:
             # ----------------------------------------------------------------------------------------
             # VERBOSELOGS indicates if the web server logs are written to the Docker Container logs
             # (accessible with `docker logs webproxy`) or that they are discarded. Values are ON (default) or OFF
-            - VERBOSELOG=ON
+            - VERBOSELOG=FILE # FOR GOACCESS STATS
             # ----------------------------------------------------------------------------------------
             # REVPROXY has the following format:
             #     urltarget,destination
@@ -116,6 +116,27 @@ services:
         tmpfs:
             - /tmp:rw,nosuid,nodev,noexec,relatime,size=128M
         volumes:
-            - /home/pi/.webproxy:/run/nginx
+            - /home/pi/.webproxy:/run/nginx # your prefer path
             - "/etc/localtime:/etc/localtime:ro"
             - "/etc/timezone:/etc/timezone:ro"
+    goaccess:
+        image: 'xavierh/goaccess-for-nginxproxymanager:latest'
+        container_name: goaccess
+        restart: always
+        ports:
+            - '7880:7880'
+        environment:
+            - PUID=0
+            - PGID=0
+            - TZ=Asia/Ho_Chi_Minh         
+            - SKIP_ARCHIVED_LOGS=False #optional
+            - DEBUG=False #optional
+            - BASIC_AUTH=False #optional
+            - BASIC_AUTH_USERNAME=user #optional
+            - BASIC_AUTH_PASSWORD=pass #optional   
+            - EXCLUDE_IPS=127.0.0.1 #optional - comma delimited 
+            - LOG_TYPE=NCSA_COMBINED
+            - LOG_TYPE_FILE_PATTERN=access.log
+            - LANG=en_US.UTF-8           
+        volumes:
+            - '/home/pi/.webproxy:/opt/log' # your prefer path 
